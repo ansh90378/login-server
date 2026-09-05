@@ -171,6 +171,42 @@ class TestMe:
         resp = await client.get("/api/v1/me")
         assert resp.status_code == 401
 
+
+class TestActiveSessions:
+    async def test_active_sessions_requires_admin_key(
+        self, client: AsyncClient, monkeypatch
+    ) -> None:
+        from core.config import settings
+
+        monkeypatch.setattr(settings, "ADMIN_API_KEY", "test-admin-key")
+        resp = await client.get(
+            "/api/v1/admin/active-sessions",
+            headers={"X-Admin-Key": "wrong-key"},
+        )
+        assert resp.status_code == 403
+
+    async def test_active_sessions_lists_logged_in_user(
+        self, client: AsyncClient, test_user, monkeypatch
+    ) -> None:
+        from core.config import settings
+
+        monkeypatch.setattr(settings, "ADMIN_API_KEY", "test-admin-key")
+        await client.post(
+            "/api/v1/login",
+            json={
+                "email": "testuser@example.com",
+                "password": "StrongPass1",
+            },
+        )
+
+        resp = await client.get(
+            "/api/v1/admin/active-sessions",
+            headers={"X-Admin-Key": "test-admin-key"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()[0]["email"] == "testuser@example.com"
+        assert "expires_at" in resp.json()[0]
+
     async def test_get_me_invalid_token(self, client: AsyncClient) -> None:
         resp = await client.get(
             "/api/v1/me",

@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timezone
 
 from core.config import settings
-from core.redis import delete_key, exists_key, get_key, get_redis, set_key
+from core.redis import delete_key, exists_key, get_key, get_keys, set_key
 
 _REFRESH_PREFIX = "refresh_token:"
 _BLACKLIST_PREFIX = "blacklisted_token:"
@@ -44,6 +44,20 @@ class SessionRepository:
         if raw is None:
             return None
         return json.loads(raw)
+
+    @staticmethod
+    async def get_active_sessions() -> list[dict]:
+        sessions = []
+        for key in await get_keys(_REFRESH_PREFIX):
+            raw = await get_key(key)
+            if raw is None:
+                continue
+            session = json.loads(raw)
+            sessions.append({
+                "jti": key.removeprefix(_REFRESH_PREFIX),
+                **session,
+            })
+        return sessions
 
     @staticmethod
     async def delete_refresh_token(jti: str) -> None:

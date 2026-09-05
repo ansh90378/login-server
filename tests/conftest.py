@@ -49,6 +49,14 @@ def mock_redis():
     mock_redis_client.delete = AsyncMock(side_effect=lambda key: store.pop(key, None))
     mock_redis_client.exists = AsyncMock(side_effect=lambda key: 1 if key in store else 0)
 
+    async def scan_iter(match: str):
+        prefix = match.removesuffix("*")
+        for key in store:
+            if key.startswith(prefix):
+                yield key
+
+    mock_redis_client.scan_iter = scan_iter
+
     with patch("core.redis._redis", mock_redis_client), \
              patch("core.redis.get_redis", return_value=mock_redis_client):
         yield

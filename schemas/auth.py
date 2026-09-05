@@ -75,5 +75,13 @@ class UserResponse(BaseModel):
     last_login_at: str | None
 
 
+class ActiveSessionResponse(BaseModel):
+    user_id: str
+    email: EmailStr
+    display_name: str | None
+    last_login_at: str | None
+    expires_at: float
+
+
 class ErrorResponse(BaseModel):
     detail: str

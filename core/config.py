@@ -98,6 +98,7 @@ class Settings(BaseSettings):
     # ── App ───────────────────────────────────────────────────────────────
     APP_NAME: str = "Login Server"
     DEBUG: bool = False
+    ADMIN_API_KEY: str = ""
 
     # ── Audit ─────────────────────────────────────────────────────────────
     AUDIT_LOG_TABLE: str = "audit_log"

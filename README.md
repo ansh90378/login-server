@@ -219,6 +219,7 @@ TTL:   7 days (configurable)
 | POST   | `/api/v1/refresh`  | No            | Rotate refresh token     |
 | POST   | `/api/v1/logout`   | Yes           | Revoke refresh token     |
 | GET    | `/api/v1/me`       | Yes           | Get current user profile |
+| GET    | `/api/v1/admin/active-sessions` | `X-Admin-Key` | List users with active refresh sessions |
 | POST   | `/api/v1/mfa/setup`| Yes           | Enable TOTP MFA          |
 | POST   | `/api/v1/mfa/verify`| Yes          | Verify MFA code          |
 | GET    | `/api/v1/.well-known/jwks.json` | No | Public keys for signature verification |
@@ -226,6 +227,11 @@ TTL:   7 days (configurable)
 ---
 
 ## 7. Security Considerations
+
+Set `ADMIN_API_KEY` to a long random secret before using the active-session
+inspection endpoint. Request it with the `X-Admin-Key` header. The endpoint
+returns user identity and session expiry metadata only; it never returns
+refresh tokens.
 
 | Threat                    | Mitigation                                                 |
 |---------------------------|------------------------------------------------------------|

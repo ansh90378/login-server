@@ -74,6 +74,10 @@ async def _dict_exists(key: str) -> bool:
     return not _expired(key)
 
 
+async def _dict_keys(prefix: str) -> list[str]:
+    return [key for key in list(_store) if key.startswith(prefix) and not _expired(key)]
+
+
 async def _dict_incr(key: str) -> int:
     entry = _store.get(key)
     if entry is None or _expired(key):
@@ -123,3 +127,10 @@ async def exists_key(key: str) -> bool:
         return await _dict_exists(key)
     r = get_redis()
     return await r.exists(key) > 0
+
+
+async def get_keys(prefix: str) -> list[str]:
+    if settings.DISABLE_REDIS:
+        return await _dict_keys(prefix)
+    r = get_redis()
+    return [key async for key in r.scan_iter(match=f"{prefix}*")]
